@@ -25,7 +25,7 @@ module Fastbeans
       begin
         call_without_retries(*data)
       rescue Fastbeans::RemoteConnectionFailed => e
-        if counter < retries
+        if counter < 3
           counter += 1
           begin
             reconnect!
