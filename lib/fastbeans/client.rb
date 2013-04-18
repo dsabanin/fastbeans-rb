@@ -21,12 +21,12 @@ module Fastbeans
     end
 
     def call(*data)
-      counter = 0
+      retries = 0
       begin
         call_without_retries(*data)
       rescue Fastbeans::RemoteConnectionFailed => e
-        if counter < 3
-          counter += 1
+        if retries < 3
+          retries += 1
           begin
             reconnect!
           rescue => e
@@ -34,7 +34,7 @@ module Fastbeans
           end
           retry
         else
-          raise RemoteConnectionDead, "#{e.message} (#{counter} retries)"
+          raise RemoteConnectionDead, "#{e.message} (#{retries} retries)"
         end
       end
     end
