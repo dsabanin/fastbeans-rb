@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Fastbeans::VERSION
   spec.authors       = ["Dima Sabanin"]
   spec.email         = ["sdmitry@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{Tiny and fast RPC client for Ruby to call Clojure code}
+  spec.summary       = %q{Ruby piece of Ruby/Clojure RPC system extracted from beanstalkapp.com}
+  spec.homepage      = "https://github.com/dsabanin/fastbeans-rb"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "msgpack"
+  spec.add_runtime_dependency "rufus-lru"
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
 end

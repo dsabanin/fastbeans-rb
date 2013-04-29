@@ -1,12 +1,23 @@
 require 'msgpack'
 require 'thread'
+require 'rufus-lru'
 
 module Fastbeans
 
   class Client
-    def initialize(host, port)
+    CALL_CACHE_SIZE=100
+
+    attr_reader :call_cache
+
+    def initialize(host, port, cache_size=nil)
       @host, @port = host, port
+      @cache_size ||= CALL_CACHE_SIZE
+      @call_cache = Rufus::Lru::SynchronizedHash.new(@cache_size)
       connect!(host, port)
+    end
+
+    def clear_call_cache!
+      @call_cache.clear
     end
 
     def reconnect!
@@ -37,6 +48,10 @@ module Fastbeans
           raise RemoteConnectionDead, "#{e.message} (#{counter} retries)"
         end
       end
+    end
+
+    def cached_call(*data)
+      @call_cache[data] ||= call(*data)
     end
 
     def call_without_retries(*data)
