@@ -56,7 +56,9 @@ module Fastbeans
 
     def call_without_retries(*data)
       resp = @mutex.synchronize do
-        MessagePack.pack(data, @sock)
+        payload = MessagePack.pack(data).force_encoding("CP1252") # fucking kill me please
+        @sock.write([payload.bytesize].pack("N"))
+        @sock.write(payload)
         MessagePack.load(@sock)
       end
       if resp == 0xDEAD
