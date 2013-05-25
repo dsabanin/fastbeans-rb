@@ -73,7 +73,7 @@ module Fastbeans
       else
         resp
       end
-    rescue IOError, Errno::EPIPE => e
+    rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
       ne = RemoteConnectionFailed.new(e.message)
       ne.orig_exc = e
       raise ne
