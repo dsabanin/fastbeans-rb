@@ -40,9 +40,9 @@ module Fastbeans
         begin
           call_without_retries(*data)
         rescue Fastbeans::RemoteConnectionFailed => e
-          debug(e)
+          Fastbeans.debug(e)
           if retries < MAX_RETRIES
-            debug("Retrying (#{retries} out of #{MAX_RETRIES} retries)")
+            Fastbeans.debug("Retrying (#{retries} out of #{MAX_RETRIES} retries)")
             retries += 1
             begin
               reconnect!
