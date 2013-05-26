@@ -1,6 +1,7 @@
 require 'msgpack'
 require 'thread'
 require 'rufus-lru'
+require 'fastbeans/response'
 
 module Fastbeans
 
@@ -62,17 +63,14 @@ module Fastbeans
     end
 
     def call_without_retries(*data)
-      resp = @mutex.synchronize do
+      raw_resp = @mutex.synchronize do
         payload = MessagePack.pack(data).force_encoding("BINARY")
         @sock.write([payload.bytesize].pack("N"))
         @sock.write(payload)
         MessagePack.load(@sock)
       end
-      if resp == 0xDEAD
-        raise RemoteException.new("Remote exception on #{data.inspect} through #{@sock.inspect}")
-      else
-        resp
-      end
+      resp = Response.new(data, raw_resp)
+      resp.payload
     rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
       ne = RemoteConnectionFailed.new(e.message)
       ne.orig_exc = e
