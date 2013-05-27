@@ -10,7 +10,7 @@ module Fastbeans
     def debug(str_or_exc)
       case str_or_exc
         when String 
-          STDERR.puts("[#{Time.now}] #{str}") if self.debug_mode
+          STDERR.puts("[#{Time.now}] #{str_or_exc}") if self.debug_mode
         when Exception
           debug("Exception: #{str_or_exc.message}\n#{str_or_exc.backtrace.join("\n")}")
       end
