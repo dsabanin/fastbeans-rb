@@ -1,38 +1,31 @@
 require 'msgpack'
-require 'thread'
 require 'rufus-lru'
+require 'fastbeans/connection'
 require 'fastbeans/response'
+require 'connection_pool'
 
 module Fastbeans
-
   class Client
     CALL_CACHE_SIZE=100
     MAX_RETRIES=3
     
     attr_reader :call_cache
 
-    def initialize(host="127.0.0.1", port=12345, cache_size=nil)
+    def initialize(host="127.0.0.1", port=12345, cache_size=nil, pool_opts={})
       @host, @port = host, port
       @cache_size ||= CALL_CACHE_SIZE
       @call_cache = Rufus::Lru::SynchronizedHash.new(@cache_size)
-      connect!(host, port)
+      @pool_opts =  {:size => 5, :timeout => 5}.update(pool_opts)
+    end
+
+    def pool
+      @pool ||= ConnectionPool.new(@pool_opts) do
+        Fastbeans::Connection.new(@host, @port)
+      end
     end
 
     def clear_call_cache!
       @call_cache.clear
-    end
-
-    def reconnect!
-      disconnect!
-      connect!(@host, @port)
-    end
-
-
-    def connect!(host, port)
-      Fastbeans.debug("Connecting to #{host}:#{port}")
-      @sock = TCPSocket.new(host, port)
-      @sock.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-      @mutex = Mutex.new
     end
 
     def call(*data)
@@ -63,11 +56,11 @@ module Fastbeans
     end
 
     def call_without_retries(*data)
-      raw_resp = @mutex.synchronize do
+      raw_resp = pool.with do |conn|
         payload = MessagePack.pack(data).force_encoding("BINARY")
-        @sock.write([payload.bytesize].pack("N"))
-        @sock.write(payload)
-        MessagePack.load(@sock)
+        conn.write([payload.bytesize].pack("N"))
+        conn.write(payload)
+        MessagePack.load(conn.socket)
       end
       resp = Response.new(data, raw_resp)
       resp.payload
@@ -76,12 +69,5 @@ module Fastbeans
       ne.orig_exc = e
       raise ne
     end
-
-    def disconnect!
-      if @sock
-        @sock.close rescue nil
-      end
-    end
   end
-
 end
