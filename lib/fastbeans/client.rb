@@ -7,7 +7,6 @@ require 'connection_pool'
 module Fastbeans
   class Client
     CALL_CACHE_SIZE=100
-    MAX_RETRIES=3
     
     attr_reader :call_cache
 
@@ -30,44 +29,14 @@ module Fastbeans
 
     def call(*data)
       Fastbeans.benchmark("Calling: #{data.inspect}") do
-        retries = 0
-        begin
-          call_without_retries(*data)
-        rescue Fastbeans::RemoteConnectionFailed => e
-          Fastbeans.debug(e)
-          if retries < MAX_RETRIES
-            Fastbeans.debug("Retrying (#{retries} out of #{MAX_RETRIES} retries)")
-            retries += 1
-            begin
-              reconnect!
-            rescue => e
-              raise RemoteConnectionDead, e.message
-            end
-            retry
-          else
-            raise RemoteConnectionDead, "#{e.message} (#{retries} retries)"
-          end
+        pool.with do |conn|
+          conn.call(*data)
         end
       end
     end
 
     def cached_call(*data)
       @call_cache[data] ||= call(*data)
-    end
-
-    def call_without_retries(*data)
-      raw_resp = pool.with do |conn|
-        payload = MessagePack.pack(data).force_encoding("BINARY")
-        conn.write([payload.bytesize].pack("N"))
-        conn.write(payload)
-        MessagePack.load(conn.socket)
-      end
-      resp = Response.new(data, raw_resp)
-      resp.payload
-    rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
-      ne = RemoteConnectionFailed.new(e.message)
-      ne.orig_exc = e
-      raise ne
     end
   end
 end
