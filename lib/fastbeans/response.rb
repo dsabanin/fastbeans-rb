@@ -1,6 +1,4 @@
 module Fastbeans
-
-
   class Response
 
     def initialize(call_data, raw_response)
@@ -12,9 +10,21 @@ module Fastbeans
       @raw_response.is_a?(Hash) and @raw_response.has_key?("fastbeans-error")
     end
 
+    def signature
+      unless error?
+        @raw_response[0]
+      else
+        nil
+      end
+    end
+
+    def signed_with?(orig_signature)
+      signature == orig_signature
+    end
+
     def payload
       unless error?
-        @raw_response
+        @raw_response[1]
       else
         raise to_exception
       end
@@ -48,5 +58,4 @@ module Fastbeans
       word
     end
   end
-
 end

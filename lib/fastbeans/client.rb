@@ -1,7 +1,6 @@
 require 'msgpack'
 require 'rufus-lru'
 require 'fastbeans/connection'
-require 'fastbeans/response'
 require 'connection_pool'
 
 module Fastbeans

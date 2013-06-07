@@ -1,4 +1,5 @@
 require 'socket'
+require 'fastbeans/request'
 
 module Fastbeans
   class Connection
@@ -15,11 +16,17 @@ module Fastbeans
     def connect!(host, port)
       @socket = TCPSocket.new(host, port)
       @socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+      @socket
+    end
+
+    def get_socket
+      @socket || connect!(@host, @port)
     end
 
     def disconnect!
       if @socket
         @socket.close rescue nil
+        @socket = nil
       end
     end
 
@@ -49,14 +56,18 @@ module Fastbeans
       end
     end
 
+    def with_socket
+      yield(get_socket)
+    end
+
     def call_without_retries(*data)
-      payload = MessagePack.pack(data).force_encoding("BINARY")
-      @socket.write([payload.bytesize].pack("N"))
-      @socket.write(payload)
-      raw_resp = MessagePack.load(@socket)
-      resp = Response.new(data, raw_resp)
-      resp.payload
+      req = Request.new(self)
+      req.perform(data)
+    rescue Exception
+      disconnect!
+      raise
     rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
+      disconnect!
       ne = RemoteConnectionFailed.new(e.message)
       ne.orig_exc = e
       raise ne
