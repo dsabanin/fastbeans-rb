@@ -16,7 +16,10 @@ module Fastbeans
     def perform(data)
       signature = sign(data)
       signed_data = [signature, data]
-      payload = MessagePack.pack(signed_data).force_encoding("BINARY")
+      payload = MessagePack.pack(signed_data)
+      if payload.respond_to?(:force_encoding)
+        payload = payload.force_encoding('BINARY')
+      end
       connection.with_socket do |sock|
         sock.write([payload.bytesize].pack("N"))
         sock.write(payload)
