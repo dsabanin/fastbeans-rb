@@ -21,10 +21,10 @@ module Fastbeans
         payload = payload.force_encoding('BINARY')
       end
       connection.with_socket do |sock|
-        sock.write([payload.bytesize].pack("N"))
+        sock.write([payload.bytesize].pack('N'))
         sock.write(payload)
         raw_resp = MessagePack.load(sock)
-        resp = Response.new(data, raw_resp)
+        resp = Fastbeans::Response.new(data, raw_resp)
         if resp.signed_with?(signature)
           resp.payload
         else
