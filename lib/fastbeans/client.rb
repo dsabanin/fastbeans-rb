@@ -1,24 +1,26 @@
 require 'msgpack'
 require 'rufus-lru'
-require 'fastbeans/connection'
 require 'connection_pool'
+require 'fastbeans/connection'
 
 module Fastbeans
   class Client
     CALL_CACHE_SIZE=100
     
     attr_reader :call_cache
+    attr_accessor :connection_class
 
-    def initialize(host="127.0.0.1", port=12345, cache_size=nil, pool_opts={})
+    def initialize(host='127.0.0.1', port=12345, cache_size=nil, pool_opts={})
       @host, @port = host, port
       @cache_size ||= CALL_CACHE_SIZE
       @call_cache = Rufus::Lru::SynchronizedHash.new(@cache_size)
       @pool_opts =  {:size => 5, :timeout => 5}.update(pool_opts)
+      @connection_class = Fastbeans::Connection
     end
 
     def pool
       @pool ||= ConnectionPool.new(@pool_opts) do
-        Fastbeans::Connection.new(@host, @port)
+        @connection_class.new(@host, @port)
       end
     end
 
