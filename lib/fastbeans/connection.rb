@@ -10,7 +10,7 @@ module Fastbeans
     def initialize(host, port)
       Fastbeans.debug("Connecting to #{host}:#{port}")
       @host, @port = host, port
-      connect!(@host, @port)
+      @socket = connect!(@host, @port)
     end
 
     def connect!(host, port)
@@ -38,7 +38,7 @@ module Fastbeans
     def call(*data)
       retries = 0
       begin
-        call_without_retries(*data)
+        call_without_retries(data)
       rescue Fastbeans::RemoteConnectionFailed => e
         Fastbeans.debug(e)
         if retries < MAX_RETRIES
@@ -56,22 +56,26 @@ module Fastbeans
       end
     end
 
-    def with_socket
-      yield(get_socket)
-    end
+    def call_without_retries(data)
+      perform(data)
 
-    def call_without_retries(*data)
-      req = Request.new(self)
-      req.perform(data)
-    rescue Exception
-      disconnect!
-      raise
     rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
       disconnect!
       ne = RemoteConnectionFailed.new(e.message)
       ne.orig_exc = e
       raise ne
+
+    rescue Exception
+      disconnect!
+      raise
     end
 
+    def with_socket
+      yield(get_socket)
+    end
+
+    def perform(data)
+      Request.new(self).perform(data)
+    end
   end
 end
