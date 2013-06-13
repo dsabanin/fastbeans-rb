@@ -9,26 +9,39 @@ module Fastbeans
       @connection = connection
     end
 
-    def sign(data)
-      Digest::MD5.hexdigest(data.inspect)
+    def sign(call_data)
+      Digest::MD5.hexdigest(call_data.inspect)
     end
 
-    def perform(data)
-      signature = sign(data)
-      signed_data = [signature, data]
+    def build_payload(call_data)
+      signature = sign(call_data)
+      signed_data = [signature, call_data]
       payload = MessagePack.pack(signed_data)
       if payload.respond_to?(:force_encoding)
-        payload = payload.force_encoding('BINARY')
+        payload.force_encoding('BINARY')
       end
+      [signature, payload]
+    end
+
+    def write_payload(sock, payload)
+      sock.write([payload.bytesize].pack('N'))
+      sock.write(payload)
+    end
+
+    def read_response(sock, call_data)
+      raw_resp = MessagePack.load(sock)
+      Fastbeans::Response.new(call_data, raw_resp)
+    end
+
+    def perform(call_data)
       connection.with_socket do |sock|
-        sock.write([payload.bytesize].pack('N'))
-        sock.write(payload)
-        raw_resp = MessagePack.load(sock)
-        resp = Fastbeans::Response.new(data, raw_resp)
-        if resp.signed_with?(signature)
+        signature, payload = build_payload(call_data)
+        write_payload(sock, payload)
+        resp = read_response(sock, call_data)
+        if resp.error? or resp.signed_with?(signature)
           resp.payload
         else
-          raise ResponseSignatureMismatch, "Received #{resp.signature} signature instead of expected #{signature} for #{data} call"
+          raise ResponseSignatureMismatch, "Received #{resp.signature} signature instead of expected #{signature} for #{call_data} call"
         end
       end
     end
