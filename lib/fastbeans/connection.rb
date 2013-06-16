@@ -59,7 +59,7 @@ module Fastbeans
     def call_without_retries(data)
       perform(data)
 
-    rescue IOError, Errno::EPIPE, MessagePack::MalformedFormatError => e
+    rescue IOError, Errno::EPIPE, Errno::ECONNREFUSED, Errno::ECONNRESET, MessagePack::MalformedFormatError => e
       disconnect!
       ne = RemoteConnectionFailed.new(e.message)
       ne.orig_exc = e
