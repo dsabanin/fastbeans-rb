@@ -1,5 +1,3 @@
-require_relative 'test_helper'
-
 class ConnectionTest < MiniTest::Unit::TestCase
 
   def setup

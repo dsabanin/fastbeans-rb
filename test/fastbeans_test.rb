@@ -1,5 +1,3 @@
-require_relative 'test_helper'
-
 class FastbeansTest < MiniTest::Unit::TestCase
 
   def test_should_autocreate_exceptions

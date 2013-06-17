@@ -1,5 +1,3 @@
-require_relative 'test_helper'
-
 class ResponseTest < MiniTest::Unit::TestCase
 
   def setup
