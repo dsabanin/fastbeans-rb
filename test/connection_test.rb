@@ -1,4 +1,4 @@
-class ConnectionTest < MiniTest::Unit::TestCase
+class ConnectionTest < TestUnit::Unit::TestCase
 
   def setup
     Fastbeans::Connection.any_instance.stubs(:connect!).returns(StringIO.new)

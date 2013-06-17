@@ -1,4 +1,4 @@
-class FastbeansTest < MiniTest::Unit::TestCase
+class FastbeansTest < TestUnit::Unit::TestCase
 
   def test_should_autocreate_exceptions
     assert_equal Fastbeans::RemoteException, Fastbeans.exception('RemoteException')

@@ -1,6 +1,11 @@
-require 'minitest/unit'
-require 'minitest/autorun'
-begin; require 'minitest/pride'; rescue LoadError; end
+if RUBY_VERSION !~ /^1.8/
+  # require 'minitest/unit'
+  require 'minitest/autorun'
+  require 'minitest/pride'
+  ::TestUnit = Minitest
+else
+  require 'test/unit'
+end
 require 'mocha/setup'
 
 require 'fastbeans'
