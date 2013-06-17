@@ -1,11 +1,13 @@
 if RUBY_VERSION !~ /^1.8/
-  # require 'minitest/unit'
+  require 'minitest/unit'
   require 'minitest/autorun'
   require 'minitest/pride'
-  TestUnit = Minitest
 else
   require 'test/unit'
 end
+
+TestUnit = Minitest
+
 require 'mocha/setup'
 
 require 'fastbeans'
