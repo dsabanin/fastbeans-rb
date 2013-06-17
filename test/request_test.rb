@@ -1,4 +1,4 @@
-class RequestTest < TestUnit::Unit::TestCase
+class RequestTest < MiniTest::Unit::TestCase
 
   def setup
     @conn = MockConnection.new

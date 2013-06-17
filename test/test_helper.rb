@@ -1,12 +1,6 @@
-if RUBY_VERSION !~ /^1.8/
-  require 'minitest/unit'
-  require 'minitest/autorun'
-  require 'minitest/pride'
-else
-  require 'test/unit'
-end
-
-TestUnit = Minitest
+require 'minitest/unit'
+require 'minitest/autorun'
+require 'minitest/pride'
 
 require 'mocha/setup'
 

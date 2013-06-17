@@ -1,4 +1,4 @@
-class ResponseTest < TestUnit::Unit::TestCase
+class ResponseTest < MiniTest::Unit::TestCase
 
   def setup
     @test_msg = ['+', 1, 2, 3]

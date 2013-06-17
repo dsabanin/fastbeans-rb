@@ -1,4 +1,4 @@
-class ClientTest < TestUnit::Unit::TestCase
+class ClientTest < MiniTest::Unit::TestCase
 
   def setup
     @client = Fastbeans::Client.new
