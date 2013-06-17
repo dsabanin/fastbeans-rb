@@ -1,6 +1,6 @@
 require 'minitest/unit'
 require 'minitest/autorun'
-require 'minitest/pride'
+begin; require 'minitest/pride'; rescue LoadError end
 require 'mocha/setup'
 
 require 'fastbeans'
