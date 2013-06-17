@@ -1,4 +1,4 @@
-# Fastbeans
+# Fastbeans [![Build Status](https://travis-ci.org/dsabanin/fastbeans-rb.png)](https://travis-ci.org/dsabanin/fastbeans-rb)
 
 TODO: Write a gem description
 
