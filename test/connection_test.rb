@@ -51,7 +51,8 @@ class ConnectionTest < MiniTest::Unit::TestCase
   end
 
   def test_io_exceptions_during_call
-    ioexcs = [IOError, Errno::EPIPE, MessagePack::MalformedFormatError]
+    ioexcs = [IOError, Errno::EPIPE, MessagePack::MalformedFormatError,
+              Errno::ECONNREFUSED, Errno::ECONNRESET]
     ioexcs.each do |exc|
       @conn.expects(:perform).with(@test_msg).raises(exc)
       @conn.expects(:disconnect!)
