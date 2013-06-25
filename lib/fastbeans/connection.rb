@@ -10,7 +10,12 @@ module Fastbeans
     def initialize(host, port)
       Fastbeans.debug("Connecting to #{host}:#{port}")
       @host, @port = host, port
-      @socket = connect!(@host, @port)
+      begin
+        @socket = connect!(@host, @port)
+      rescue => e 
+        Fastbeans.error(e)
+        raise RemoteConnectionDead, e.message
+      end
     end
 
     def connect!(host, port)
