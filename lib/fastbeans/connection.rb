@@ -72,6 +72,9 @@ module Fastbeans
 
     def with_socket
       yield(get_socket)
+    rescue Exception => anything
+      disconnect!
+      raise
     end
 
     def perform(data)
