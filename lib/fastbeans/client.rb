@@ -9,11 +9,11 @@ module Fastbeans
     
     attr_reader :call_cache
     attr_accessor :connection_class
+    attr_accessor :cache_class
 
-    def initialize(host='127.0.0.1', port=12345, cache_size=nil, pool_opts={})
+    def initialize(host='127.0.0.1', port=12345, cache=nil, pool_opts={})
       @host, @port = host, port
-      @cache_size ||= CALL_CACHE_SIZE
-      @call_cache = Rufus::Lru::SynchronizedHash.new(@cache_size)
+      @call_cache = cache || Rufus::Lru::SynchronizedHash.new(CALL_CACHE_SIZE)
       @pool_opts =  {:size => 5, :timeout => 5}.update(pool_opts)
       @connection_class = Fastbeans::Connection
     end
