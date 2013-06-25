@@ -31,7 +31,7 @@ module Fastbeans
       blk.call
     ensure
       t2 = Time.now
-      debug("Time spent: #{t2-t1}s")
+      debug("Time spent: #{t2-t1}s") if t1
     end
 
     def exception(classname)
