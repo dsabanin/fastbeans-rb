@@ -16,6 +16,15 @@ module Fastbeans
       end
     end
 
+    def error(str_or_exc)
+      case str_or_exc
+        when String 
+          STDERR.puts("[#{Time.now}] #{str_or_exc}")
+        when Exception
+          error("Exception: #{str_or_exc.message}\n#{str_or_exc.backtrace.join("\n")}")
+      end
+    end
+
     def benchmark(str, &blk)
       debug(str)
       t1 = Time.now
