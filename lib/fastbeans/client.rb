@@ -29,7 +29,7 @@ module Fastbeans
     end
 
     def call(*data)
-      Fastbeans.benchmark("Calling: #{data.inspect}") do
+      Fastbeans.benchmark("Calling: #{data.first.inspect}") do
         pool.with do |conn|
           conn.call(*data)
         end
