@@ -1,9 +1,12 @@
 require 'digest/md5'
 require 'fastbeans/response'
+require 'timeout'
 
 module Fastbeans
   class Request
     attr_reader :connection
+
+    RESPONSE_READ_TIMEOUT = 120
 
     def initialize(connection)
       @connection = connection
@@ -29,8 +32,13 @@ module Fastbeans
     end
 
     def read_response(sock, call_data)
-      raw_resp = MessagePack.load(sock)
+      raw_resp = Timeout.timeout(RESPONSE_READ_TIMEOUT, Fastbeans::ResponseReadTimeout) do
+        MessagePack.load(sock)
+      end
       Fastbeans::Response.new(call_data, raw_resp)
+    rescue Fastbeans::ResponseReadTimeout
+      @connection.disconnect!
+      raise Fastbeans::ResponseReadTimeout, "Couldn't read response in #{RESPONSE_READ_TIMEOUT} seconds"
     end
 
     def perform(call_data)

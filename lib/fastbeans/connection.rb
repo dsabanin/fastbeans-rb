@@ -44,7 +44,7 @@ module Fastbeans
       retries = 0
       begin
         call_without_retries(data)
-      rescue Fastbeans::RemoteConnectionFailed => e
+      rescue Fastbeans::RemoteConnectionFailed, Fastbeans::ResponseReadTimeout => e
         Fastbeans.debug(e)
         if retries < MAX_RETRIES
           Fastbeans.debug("Retrying (#{retries} out of #{MAX_RETRIES} retries)")
