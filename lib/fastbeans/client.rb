@@ -32,7 +32,7 @@ module Fastbeans
     def call(*data)
       Fastbeans.benchmark("Calling: #{data.first.inspect}") do
         pool.with do |conn|
-          if data.last.is_a?(Hash) and (data.last.keys.to_set & Fastbeans::Request::OPTION_KEYS)
+          if data.last.is_a?(Hash) and (data.last.keys.to_set & Fastbeans::Request::OPTION_KEYS).size > 0
             opts = data.pop
           else
             opts = {}
