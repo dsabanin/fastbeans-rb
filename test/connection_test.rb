@@ -37,14 +37,14 @@ class ConnectionTest < MiniTest::Unit::TestCase
 
   def test_call_without_retries
     Fastbeans::Request.any_instance.expects(:perform).with(@test_msg).returns(:reply)
-    assert_equal :reply, @conn.call_without_retries(@test_msg)
+    assert_equal :reply, @conn.call_without_retries(@test_msg, {})
   end
 
   def test_exception_during_call
-    @conn.expects(:perform).with(@test_msg).raises(RuntimeError)
+    @conn.expects(:perform).with(@test_msg, {}).raises(RuntimeError)
     @conn.expects(:disconnect!)
     assert_raises RuntimeError do
-      @conn.call_without_retries(@test_msg)
+      @conn.call_without_retries(@test_msg, {})
     end
   end
 
@@ -52,10 +52,10 @@ class ConnectionTest < MiniTest::Unit::TestCase
     ioexcs = [IOError, Errno::EPIPE, MessagePack::MalformedFormatError,
               Errno::ECONNREFUSED, Errno::ECONNRESET]
     ioexcs.each do |exc|
-      @conn.expects(:perform).with(@test_msg).raises(exc)
+      @conn.expects(:perform).with(@test_msg, {}).raises(exc)
       @conn.expects(:disconnect!)
       assert_raises Fastbeans::RemoteConnectionFailed do
-        @conn.call_without_retries(@test_msg)
+        @conn.call_without_retries(@test_msg, {})
       end
     end
   end
@@ -63,17 +63,17 @@ class ConnectionTest < MiniTest::Unit::TestCase
   def test_perform
     req = mock
     req.expects(:perform).with(@test_msg).returns(:result)
-    Fastbeans::Request.expects(:new).with(@conn).returns(req)
-    assert_equal :result, @conn.perform(@test_msg)
+    Fastbeans::Request.expects(:new).with(@conn, {}).returns(req)
+    assert_equal :result, @conn.perform(@test_msg, {})
   end
 
   def test_call_with_retries
     @conn.expects(:call_without_retries).
-        with(@test_msg).times(4).
+        with(@test_msg, {}).times(4).
         raises(Fastbeans::RemoteConnectionFailed)
     @conn.expects(:reconnect!).times(3)
     assert_raises Fastbeans::RemoteConnectionDead do
-      assert_nil @conn.call(*@test_msg)
+      assert_nil @conn.call(@test_msg, {})
     end
   end
 

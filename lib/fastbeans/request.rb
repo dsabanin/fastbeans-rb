@@ -7,9 +7,11 @@ module Fastbeans
     attr_reader :connection
 
     RESPONSE_READ_TIMEOUT = 120
+    OPTION_KEYS = [:timeout]
 
-    def initialize(connection)
+    def initialize(connection, opts = {})
       @connection = connection
+      @options = {:timeout => RESPONSE_READ_TIMEOUT}.update(opts)
     end
 
     def sign(call_data)
@@ -32,13 +34,13 @@ module Fastbeans
     end
 
     def read_response(sock, call_data)
-      raw_resp = Timeout.timeout(RESPONSE_READ_TIMEOUT, Fastbeans::ResponseReadTimeout) do
+      raw_resp = Timeout.timeout(@options[:timeout], Fastbeans::ResponseReadTimeout) do
         MessagePack.load(sock)
       end
       Fastbeans::Response.new(call_data, raw_resp)
     rescue Fastbeans::ResponseReadTimeout
       @connection.disconnect!
-      raise Fastbeans::ResponseReadTimeout, "Couldn't read response in #{RESPONSE_READ_TIMEOUT} seconds"
+      raise Fastbeans::ResponseReadTimeout, "Couldn't read response in #{@options[:timeout]} seconds"
     end
 
     def perform(call_data)

@@ -40,10 +40,10 @@ module Fastbeans
       connect!(@host, @port)
     end
 
-    def call(*data)
+    def call(data, opts)
       retries = 0
       begin
-        call_without_retries(data)
+        call_without_retries(data, opts)
       rescue Fastbeans::RemoteConnectionFailed, Fastbeans::ResponseReadTimeout => e
         Fastbeans.debug(e)
         if retries < MAX_RETRIES
@@ -61,8 +61,8 @@ module Fastbeans
       end
     end
 
-    def call_without_retries(data)
-      perform(data)
+    def call_without_retries(data, opts)
+      perform(data, opts)
 
     rescue IOError, Errno::EPIPE, Errno::ECONNREFUSED, Errno::ECONNRESET, MessagePack::MalformedFormatError => e
       disconnect!
@@ -82,8 +82,8 @@ module Fastbeans
       raise
     end
 
-    def perform(data)
-      Request.new(self).perform(data)
+    def perform(data, opts)
+      Request.new(self, opts).perform(data)
     end
   end
 end

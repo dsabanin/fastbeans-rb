@@ -2,6 +2,7 @@ require 'msgpack'
 require 'rufus-lru'
 require 'connection_pool'
 require 'fastbeans/connection'
+require 'fastbeans/request'
 
 module Fastbeans
   class Client
@@ -31,7 +32,12 @@ module Fastbeans
     def call(*data)
       Fastbeans.benchmark("Calling: #{data.first.inspect}") do
         pool.with do |conn|
-          conn.call(*data)
+          if data.last.is_a?(Hash) and (data.last.keys.to_set & Fastbeans::Request::OPTION_KEYS)
+            opts = data.pop
+          else
+            opts = {}
+          end
+          conn.call(data, opts)
         end
       end
     end

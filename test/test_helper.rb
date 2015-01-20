@@ -9,7 +9,7 @@ require 'fastbeans'
 class MockConnection
   def initialize(*any); end
 
-  def call(*data)
+  def call(data, opts)
     data
   end
 
