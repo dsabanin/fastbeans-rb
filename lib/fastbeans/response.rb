@@ -26,15 +26,17 @@ module Fastbeans
       unless error?
         @raw_response[1]
       else
-        raise to_exception
+        raise_exception
       end
     end
 
-    def to_exception
+    def raise_exception
       name = camelize(underscore(@raw_response["fastbeans-error"]))
       error = @raw_response["error-information"]
 
-      Fastbeans.exception(name).new("%s. Call: %s" % [error["message"], error["call"]], error["backtrace"])
+      msg = "%s. Call: %s" % [error["message"], error["call"]]
+      backtrace = error["backtrace"].split(/\n/).concat(caller).flatten.compact
+      raise Fastbeans.exception(name), msg, backtrace
     end
 
     def camelize(term, uppercase_first_letter = true)
