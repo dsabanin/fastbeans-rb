@@ -32,7 +32,9 @@ module Fastbeans
 
     def to_exception
       name = camelize(underscore(@raw_response["fastbeans-error"]))
-      Fastbeans.exception(name).new(@raw_response["error-information"])
+      error = @raw_response["error-information"]
+
+      Fastbeans.exception(name).new("%s. Call: %s" % [error["message"], error["call"]], error["backtrace"])
     end
 
     def camelize(term, uppercase_first_letter = true)

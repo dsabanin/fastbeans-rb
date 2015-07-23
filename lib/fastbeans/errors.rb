@@ -2,6 +2,23 @@ module Fastbeans
 
   class RPCException < StandardError
     attr_accessor :orig_exc
+
+    def initialize(msg, backtrace=nil)
+      super(msg)
+      @backtrace = backtrace
+    end
+
+    def backtrace
+      if @backtrace
+        if @backtrace.is_a?(String)
+          @backtrace.split(/\n/).map(&:strip)
+        else
+          @backtrace
+        end
+      else
+        super
+      end
+    end
   end
 
   class RemoteCallFailed < Fastbeans::RPCException; end
