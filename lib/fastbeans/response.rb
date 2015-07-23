@@ -34,7 +34,7 @@ module Fastbeans
       name = camelize(underscore(@raw_response["fastbeans-error"]))
       error = @raw_response["error-information"]
 
-      msg = "%s. Call: %s" % [error["message"], error["call"]]
+      msg = "%s\nCall: %s" % [error["message"], error["call"]]
       backtrace = error["backtrace"].split(/\n/).concat(caller).flatten.compact
       raise Fastbeans.exception(name), msg, backtrace
     end
