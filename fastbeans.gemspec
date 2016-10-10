@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "msgpack", "0.5.10"
+  spec.add_runtime_dependency "msgpack", "1.0.0"
   spec.add_runtime_dependency "rufus-lru"
   spec.add_runtime_dependency "connection_pool"
   spec.add_development_dependency "bundler", "~> 1.3"
